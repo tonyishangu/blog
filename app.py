@@ -1,9 +1,24 @@
-from flask import Flask,request,render_template,redirect
+from flask import Flask, render_template,request,redirect
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+from flask_wtf import FlaskForm
+
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
 db = SQLAlchemy(app)
+
+class BlogPost(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    author = db.Column(db.String(20), nullable=False, default='N/A')
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __repr__(self):
+        return 'Blog post' + str(self.id)
+        
 
 @app.route('/')
 def index():
@@ -11,6 +26,7 @@ def index():
 
 @app.route('/posts', methods=['GET', 'POST'])
 def posts():
+
     if request.method == 'POST':
         post_title = request.form['title']
         post_content = request.form['content']
@@ -57,6 +73,15 @@ def new_post():
         return redirect('/posts')
     else:
         return render_template('/new_post.html')
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+@app.route('/signup')
+def signup():
+    return render_template('signup.html')
+
 
 if __name__ == "__main__":
     app.run(debug=True)
